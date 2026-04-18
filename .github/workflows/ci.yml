@@ -30,8 +30,7 @@ jobs:
           pytest -v \
             --cov=app \
             --cov=service
-            --cov-report=term-missing \
-            --cov-report=xml:coverage.xml 
+
 
 
       - name: 📊 Upload coverage report
