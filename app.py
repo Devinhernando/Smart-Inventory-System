@@ -14,7 +14,11 @@ def home():
 def create():
     data = request.get_json()
 
-    item, err = create_item(data)
+    name = data.get("name")
+    stock = data.get("stock")
+    price = data.get("price")
+
+    item, err = create_item(name, stock, price)  # ✅ FIX
 
     if err:
         return jsonify({"error": err}), 400
