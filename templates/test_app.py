@@ -1,6 +1,6 @@
 import pytest
-from app import app
-import service
+from templates.app import app
+import templates.service as service
 
 @pytest.fixture
 def client():
