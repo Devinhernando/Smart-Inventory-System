@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-import templates.service as service
+import service as service
 
 app = Flask(__name__, template_folder='templates')
 
