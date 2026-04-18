@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Inventory System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080c14;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.09);
+      --border-glow: rgba(139,92,246,0.4);
+      --accent: #8b5cf6;
+      --accent2: #06b6d4;
+      --danger: #f43f5e;
+      --text: #e8e8f0;
+      --muted: rgba(232,232,240,0.45);
+      --gold: #f6c90e;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND AMBIANCE ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(139,92,246,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 100%, rgba(6,182,212,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 60% 40%, rgba(246,201,14,0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px),
+        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 64px 20px 40px;
+    }
+
+    .logo-tag {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(139,92,246,0.12);
+      border: 1px solid rgba(139,92,246,0.25);
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 22px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, #fff 30%, rgba(139,92,246,0.9) 70%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .subtitle {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 300;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    /* ── MAIN CONTAINER ── */
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ── STATS BAR ── */
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .stat {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      backdrop-filter: blur(20px);
+      transition: border-color 0.3s;
+    }
+
+    .stat:hover { border-color: rgba(139,92,246,0.3); }
+
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: 'Cinzel', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .stat-value span { color: var(--accent); }
+
+    /* ── FORM PANEL ── */
+    .form-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(24px);
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .form-title {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      .form-grid .btn-add { grid-column: 1/-1; }
+      .stats { flex-direction: column; }
+    }
+
+    input {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+      width: 100%;
+    }
+
+    input::placeholder { color: var(--muted); }
+
+    input:focus {
+      border-color: var(--accent);
+      background: rgba(139,92,246,0.08);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-add {
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      border: none;
+      border-radius: 12px;
+      padding: 13px 22px;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 20px rgba(139,92,246,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-add::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(139,92,246,0.5); }
+    .btn-add:hover::before { opacity: 1; }
+    .btn-add:active { transform: translateY(0); }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s 0.5s ease both;
+    }
+
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    .count-badge {
+      background: rgba(139,92,246,0.18);
+      border: 1px solid rgba(139,92,246,0.3);
+      color: var(--accent);
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── ITEM GRID ── */
+    #list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      backdrop-filter: blur(20px);
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+      animation: cardIn 0.4s ease both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(139,92,246,0.35);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 30px rgba(139,92,246,0.08);
+    }
+
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(139,92,246,0.12);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 14px;
+    }
+
+    .card-name {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.3;
+    }
+
+    .card-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .card-stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .card-stat-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .price-value { color: var(--gold); font-weight: 600; }
+
+    .stock-bar {
+      height: 3px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 100px;
+      margin-top: 3px;
+      overflow: hidden;
+    }
+
+    .stock-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transition: width 0.6s ease;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-update {
+      flex: 1;
+      background: rgba(6,182,212,0.1);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 10px;
+      padding: 9px 14px;
+      color: var(--accent2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-update:hover {
+      background: rgba(6,182,212,0.18);
+      border-color: rgba(6,182,212,0.4);
+    }
+
+    .btn-delete {
+      background: rgba(244,63,94,0.1);
+      border: 1px solid rgba(244,63,94,0.2);
+      border-radius: 10px;
+      padding: 9px 12px;
+      color: var(--danger);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+      background: rgba(244,63,94,0.18);
+      border-color: rgba(244,63,94,0.4);
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 72px 20px;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty p { font-size: 14px; margin-top: 6px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: rgba(20,24,36,0.95);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 14px;
+      backdrop-filter: blur(20px);
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { border-color: rgba(244,63,94,0.4); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .modal {
+      background: #0e1220;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      width: 340px;
+      transform: scale(0.93);
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    .modal-overlay.open .modal { transform: scale(1); }
+
+    .modal h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 17px;
+      margin-bottom: 6px;
+    }
+
+    .modal p { color: var(--muted); font-size: 13px; margin-bottom: 22px; }
+
+    .modal-actions { display: flex; gap: 10px; }
+
+    .btn-cancel {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover { background: var(--surface-hover); color: var(--text); }
+
+    .btn-confirm {
+      flex: 1;
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      border: none;
+      border-radius: 10px;
+      padding: 11px;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-confirm:hover { opacity: 0.88; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo-tag">⬡ Inventory Management</div>
+  <h1>Smart Inventory System</h1>
+  <p class="subtitle">Kelola stok barang dengan presisi dan elegan</p>
+</header>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Total Item</div>
+      <div class="stat-value" id="stat-total"><span>0</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total Stok</div>
+      <div class="stat-value" id="stat-stock"><span>0</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total Nilai</div>
+      <div class="stat-value" id="stat-value"><span style="font-size:16px;">Rp 0</span></div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-panel">
+    <div class="form-title">✦ Tambah Item Baru</div>
+    <div class="form-grid">
+      <input id="name" placeholder="Nama barang…" />
+      <input id="stock" type="number" placeholder="Stok" min="0" />
+      <input id="price" type="number" placeholder="Harga (Rp)" min="1" />
+      <button class="btn-add" onclick="addItem()">＋ Tambah</button>
+    </div>
+  </div>
+
+  <!-- Section Header -->
+  <div class="section-header">
+    <span class="section-title">Daftar Barang</span>
+    <span class="count-badge" id="count-badge">0 item</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- Item List -->
+  <div id="list"></div>
+
+</div>
+
+<!-- Update Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Perbarui Stok</h3>
+    <p id="modal-item-name">Masukkan jumlah stok baru</p>
+    <input type="number" id="modal-stock" placeholder="Stok baru…" min="0" style="margin-bottom:20px;" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-confirm" onclick="confirmUpdate()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let updateTargetId = null;
+
+  const icons = ['📦','🖥️','🎧','📱','⌨️','🖨️','💡','🔋','🎮','📷'];
+  const itemIcons = {};
+
+  function getIcon(id, name) {
+    if (!itemIcons[id]) itemIcons[id] = icons[Math.floor(Math.random() * icons.length)];
+    return itemIcons[id];
+  }
+
+  function toast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.innerHTML = (isError ? '⚠️ ' : '✓ ') + msg;
+    el.className = 'toast show' + (isError ? ' error' : '');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.className = 'toast', 3000);
+  }
+
+  async function load() {
+    const res = await fetch('/api/items');
+    const data = await res.json();
+
+    const totalStock = data.reduce((a, i) => a + i.stock, 0);
+    const totalValue = data.reduce((a, i) => a + i.stock * i.price, 0);
+
+    document.getElementById('stat-total').innerHTML = `<span>${data.length}</span>`;
+    document.getElementById('stat-stock').innerHTML = `<span>${totalStock.toLocaleString()}</span>`;
+    document.getElementById('stat-value').innerHTML = `<span style="font-size:16px;">Rp ${totalValue.toLocaleString('id-ID')}</span>`;
+    document.getElementById('count-badge').textContent = data.length + ' item';
+
+    const maxStock = Math.max(...data.map(i => i.stock), 1);
+
+    document.getElementById('list').innerHTML = data.length === 0
+      ? `<div class="empty">
+           <div class="empty-icon">📭</div>
+           <strong>Belum ada barang</strong>
+           <p>Tambahkan item baru di form di atas</p>
+         </div>`
+      : data.map((i, idx) => `
+        <div class="card" style="animation-delay:${idx * 0.06}s">
+          <div class="card-icon">${getIcon(i.id, i.name)}</div>
+          <div class="card-name">${i.name}</div>
+          <div class="card-stats">
+            <div>
+              <div class="card-stat-row">
+                <span class="card-stat-label">Stok</span>
+                <span class="card-stat-value">${i.stock.toLocaleString()} unit</span>
+              </div>
+              <div class="stock-bar"><div class="stock-fill" style="width:${Math.round(i.stock/maxStock*100)}%"></div></div>
+            </div>
+            <div class="card-stat-row">
+              <span class="card-stat-label">Harga</span>
+              <span class="card-stat-value price-value">Rp ${i.price.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="card-stat-row">
+              <span class="card-stat-label">Nilai Total</span>
+              <span class="card-stat-value">Rp ${(i.stock * i.price).toLocaleString('id-ID')}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-update" onclick="openModal(${i.id}, '${i.name}')">✏ Ubah Stok</button>
+            <button class="btn-delete" onclick="deleteItem(${i.id})">✕</button>
+          </div>
+        </div>
+      `).join('');
+  }
+
+  async function addItem() {
+    const name = document.getElementById('name').value.trim();
+    const stock = parseInt(document.getElementById('stock').value);
+    const price = parseInt(document.getElementById('price').value);
+
+    const res = await fetch('/api/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, stock, price })
+    });
+
+    const data = await res.json();
+    if (!res.ok) { toast(data.error, true); return; }
+
+    document.getElementById('name').value = '';
+    document.getElementById('stock').value = '';
+    document.getElementById('price').value = '';
+    toast(`"${name}" berhasil ditambahkan!`);
+    load();
+  }
+
+  async function deleteItem(id) {
+    const res = await fetch(`/api/items/${id}`, { method: 'DELETE' });
+    if (res.ok) { toast('Item dihapus'); load(); }
+  }
+
+  function openModal(id, name) {
+    updateTargetId = id;
+    document.getElementById('modal-item-name').textContent = `Update stok untuk "${name}"`;
+    document.getElementById('modal-stock').value = '';
+    document.getElementById('modal').classList.add('open');
+    setTimeout(() => document.getElementById('modal-stock').focus(), 100);
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    updateTargetId = null;
+  }
+
+  async function confirmUpdate() {
+    const stock = parseInt(document.getElementById('modal-stock').value);
+    const res = await fetch(`/api/items/${updateTargetId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stock })
+    });
+    const data = await res.json();
+    if (!res.ok) { toast(data.error, true); return; }
+    closeModal();
+    toast('Stok berhasil diperbarui!');
+    load();
+  }
+
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Enter' && document.getElementById('modal').classList.contains('open')) confirmUpdate();
+  });
+
+  load();
+</script>
+</body>
+</html>
