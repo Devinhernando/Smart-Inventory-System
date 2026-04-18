@@ -1,6 +1,6 @@
 # 📦 Smart Inventory System
 
-![CI](https://github.com/Devinhernando/Smart-Inventory-System/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/Devinhernando/Smart-Inventory-System/actions/workflows/ci.yml/badge.svg)](https://github.com/Devinhernando/Smart-Inventory-System/actions)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.14.3-blue)
 ![Flask](https://img.shields.io/badge/flask-3.1.0-lightgrey)
