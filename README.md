@@ -1,8 +1,8 @@
 # 📦 Smart Inventory System
 
-![CI](https://github.com/USERNAME/REPO/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Devinhernando/REPO/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
-![Python](https://img.shields.io/badge/python-3.11-blue)
+![Python](https://img.shields.io/badge/python-3.14.3-blue)
 ![Flask](https://img.shields.io/badge/flask-3.1.0-lightgrey)
 
 > Aplikasi manajemen inventori berbasis REST API yang dibangun dengan Python + Flask, dilengkapi automated testing dan CI/CD pipeline menggunakan GitHub Actions.
