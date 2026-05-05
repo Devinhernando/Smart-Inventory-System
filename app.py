@@ -61,7 +61,7 @@ def delete(id):
     if not success:
         return jsonify({"error": err}), 404
 
-    return jsonify({"message": "Deleted"}), 204
+    return jsonify({"message": "Deleted"}), 200
 
 
 if __name__ == "__main__":
