@@ -9,8 +9,8 @@ def home():
     return render_template("index.html")
 
 
-# ✅ CREATE
-@app.route("/items", methods=["POST"])
+# ✅ CREATE - Tambahkan /api/
+@app.route("/api/items", methods=["POST"])
 def create():
     data = request.get_json()
 
@@ -18,7 +18,7 @@ def create():
     stock = data.get("stock")
     price = data.get("price")
 
-    item, err = create_item(name, stock, price)  # ✅ FIX
+    item, err = create_item(name, stock, price)
 
     if err:
         return jsonify({"error": err}), 400
@@ -26,15 +26,15 @@ def create():
     return jsonify(item), 201
 
 
-# ✅ GET ALL
-@app.route("/items", methods=["GET"])
+# ✅ GET ALL - Tambahkan /api/
+@app.route("/api/items", methods=["GET"])
 def get_all():
     items = get_items()
     return jsonify(items), 200
 
 
-# ✅ UPDATE
-@app.route("/items/<int:id>", methods=["PUT"])
+# ✅ UPDATE - Tambahkan /api/
+@app.route("/api/items/<int:id>", methods=["PUT"])
 def update(id):
     data = request.get_json()
 
@@ -49,8 +49,8 @@ def update(id):
     return jsonify(item), 200
 
 
-# ✅ DELETE
-@app.route("/items/<int:id>", methods=["DELETE"])
+# ✅ DELETE - Tambahkan /api/
+@app.route("/api/items/<int:id>", methods=["DELETE"])
 def delete(id):
     success, err = delete_item(id)
 
