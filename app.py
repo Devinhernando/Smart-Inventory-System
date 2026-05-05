@@ -3,14 +3,15 @@ from service import create_item, get_items, update_item, delete_item
 
 app = Flask(__name__)
 
-# ✅ HOME
+#  HOME
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# ✅ CREATE - Tambahkan /api/
+#  CREATE
 @app.route("/api/items", methods=["POST"])
+@app.route("/items", methods=["POST"])
 def create():
     data = request.get_json()
 
@@ -26,15 +27,17 @@ def create():
     return jsonify(item), 201
 
 
-# ✅ GET ALL - Tambahkan /api/
+#  GET ALL
 @app.route("/api/items", methods=["GET"])
+@app.route("/items", methods=["GET"])
 def get_all():
     items = get_items()
     return jsonify(items), 200
 
 
-# ✅ UPDATE - Tambahkan /api/
+#  UPDATE
 @app.route("/api/items/<int:id>", methods=["PUT"])
+@app.route("/items/<int:id>", methods=["PUT"])
 def update(id):
     data = request.get_json()
 
@@ -49,8 +52,9 @@ def update(id):
     return jsonify(item), 200
 
 
-# ✅ DELETE - Tambahkan /api/
+#  DELETE
 @app.route("/api/items/<int:id>", methods=["DELETE"])
+@app.route("/items/<int:id>", methods=["DELETE"])
 def delete(id):
     success, err = delete_item(id)
 
@@ -58,6 +62,7 @@ def delete(id):
         return jsonify({"error": err}), 404
 
     return jsonify({"message": "Deleted"}), 200
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
